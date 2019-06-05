@@ -82,7 +82,7 @@ class Job
     private $employment_type;
 
     /**
-     * @ORM\Column(type="string", length=200, nullable=true)
+     * @ORM\Column(type="string", length=600, nullable=true)
      */
     private $skills;
 
