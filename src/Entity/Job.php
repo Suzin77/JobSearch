@@ -86,6 +86,21 @@ class Job
      */
     private $skills;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $latitude;
+
+    /**
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $longitude;
+
+    /**
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $marker_icon;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -255,6 +270,42 @@ class Job
     public function setSkills(?string $skills): self
     {
         $this->skills = $skills;
+
+        return $this;
+    }
+
+    public function getLatitude(): ?string
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?string $latitude): self
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    public function getLongitude(): ?string
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?string $longitude): self
+    {
+        $this->longitude = $longitude;
+
+        return $this;
+    }
+
+    public function getMarkerIcon(): ?string
+    {
+        return $this->marker_icon;
+    }
+
+    public function setMarkerIcon(?string $marker_icon): self
+    {
+        $this->marker_icon = $marker_icon;
 
         return $this;
     }
