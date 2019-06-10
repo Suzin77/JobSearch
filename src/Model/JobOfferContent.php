@@ -6,7 +6,7 @@ use GuzzleHttp\Client as GuzzleClient;
 
 class JobOfferContent
 {
-    public function getJobOffers(string $url)
+    public function getJobOffers(string $url) : array
     {
         $client = new GuzzleClient();
         $response = $client->get($url);
@@ -15,11 +15,11 @@ class JobOfferContent
     }
 
     public function getHttpResponseContent(string $url, array $headers = [])
-            {
-                $client = new GuzzleClient($headers);
-                $response = $client->get($url);
-                $body = $response->getBody();
-                return $body->getContents();
-            }
+    {
+        $client = new GuzzleClient($headers);
+        $response = $client->get($url);
+        $body = $response->getBody();
+        return $body->getContents();
+    }
 
 }
