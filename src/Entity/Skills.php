@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SkillsRepository")
  */
@@ -25,17 +24,6 @@ class Skills
      * @ORM\Column(type="integer", nullable=true)
      */
     private $skill_level;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Job")
-     * @ORM\JoinTable(name ="job_skills")
-     */
-    private $jobsCollection;
-
-    public function __construct()
-    {
-        $this->jobsCollection = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {

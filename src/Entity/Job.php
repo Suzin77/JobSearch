@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
@@ -105,6 +106,17 @@ class Job
      * @ORM\Column(type="string", length=100, nullable=true)
      */
     private $publish_time;
+
+    /**
+     * @ORM\ManyToMany (targetEntity = "Skills")
+     * @ORM\JoinTable(name ="job_skills")
+     */
+    private $jobSkillsCollection;
+
+    public function __construct()
+    {
+        $this->jobSkillsCollection = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -325,5 +337,10 @@ class Job
         $this->publish_time = $publish_time;
 
         return $this;
+    }
+
+    public function addJobSkillCollection(Skills $skill)
+    {
+        $this->jobSkillsCollection[] = $skill;
     }
 }
