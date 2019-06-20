@@ -101,6 +101,11 @@ class Job
      */
     private $marker_icon;
 
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $publish_time;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -306,6 +311,18 @@ class Job
     public function setMarkerIcon(?string $marker_icon): self
     {
         $this->marker_icon = $marker_icon;
+
+        return $this;
+    }
+
+    public function getPublishTime(): ?string
+    {
+        return $this->publish_time;
+    }
+
+    public function setPublishTime(?string $publish_time): self
+    {
+        $this->publish_time = $publish_time;
 
         return $this;
     }
