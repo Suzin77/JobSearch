@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <h1>Stats</h1>
+
+    <p>Wszystkich ofert jest {{data.offersAmounts}}</p>
+    <p>Firm mamy {{data.firms}}</p>
+    <p>Umiejestnosci mamy {{data.skills}}</p>
+
+    <div>
+        <h4>Skills names</h4>
+        <p>
+            {% for skill in data.skills_list %}
+                {{ skill.skill_name}}, 
+            {% endfor %}
+        </p>
+    </div>
+{% endblock %}
