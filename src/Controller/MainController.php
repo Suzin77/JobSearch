@@ -7,7 +7,8 @@ use App\Model\JobOfferWriter;
 use App\Entity\Job;
 use App\Entity\Skills;
 
-use Symfony\Component\Debug\Debug;
+//use Symfony\Component\Debug\Debug;
+use \Doctrine\Common\Util\Debug;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +22,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 class MainController extends AbstractController
 {
     /**
-     * @Route("", name = "index ")
+     * @Route("", name = "index")
      */
     public function index()
     {
@@ -48,6 +49,7 @@ class MainController extends AbstractController
                 $jobOfferWriter->settingJob($job);
             }          
         }
+        dump($count);
     }
 
     public function lastByDate():int
@@ -66,22 +68,22 @@ class MainController extends AbstractController
         return $rows[0]['NUM_ROWS'];
     }
     
-    /**
-     * @Route("/update", name = "update")
-     */
-    public function update()
-    {
-        Debug::enable();
-        $url = 'https://justjoin.it/api/offers';
-        $data = [];
-        $jobOffers = new JobOfferContent();
-        $offers = $jobOffers->getJobOffers($url);
-        
-        $offers_from_db = $this->getDoctrine()->getRepository(Job::class)->findAll();
-        
-        \Doctrine\Common\Util\Debug::dump($offers_from_db[0]);
-        $entityManager = $this->getDoctrine()->getManager();
+    // /**
+    //  * @Route("/uuuuuuupdate", name = "iuuuuuuupdate")
+    //  */
+    // public function update()
+    // {
 
-        return $this->render('base.html.twig');
-    }
+    //     $url = 'https://justjoin.it/api/offers';
+    //     $data = [];
+    //     $jobOffers = new JobOfferContent();
+    //     $offers = $jobOffers->getJobOffers($url);
+        
+    //     $offers_from_db = $this->getDoctrine()->getRepository(Job::class)->findBy([],['id'=>'DESC'],10);
+        
+    //     dump($offers_from_db, $this);
+    //     $entityManager = $this->getDoctrine()->getManager();
+
+    //     return $this->render('base.html.twig');
+    // }
 }
