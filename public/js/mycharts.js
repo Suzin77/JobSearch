@@ -38,3 +38,11 @@ var myChart = new Chart(ctx, {
         }
     }
 });
+data = [1,undefined,2];
+data = data.map(
+    function (data){
+        if (data.price === undefined){
+            data.price = null;
+        }
+    }
+)
