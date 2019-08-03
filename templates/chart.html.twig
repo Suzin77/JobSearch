@@ -4,6 +4,9 @@
 
     
     <canvas id="my" width="800" height= "600"></canvas>
+    <canvas id="mostPopular" width="800" height= "600"></canvas>
+
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
     
     <script type = "text/javascript" >
@@ -11,8 +14,7 @@
     var datafeed = {{ data|json_encode|raw }};
 
     datafeed = JSON.parse(datafeed);
-    console.log(datafeed);
-    var labelsData = datafeed.map(object => object.publish);
+    var labelsData = datafeed.map(object => object.publish); 
     var dataForCharts = datafeed.map(totalOffers => totalOffers.total_per_day);
 
     var ctx = document.getElementById('my');
@@ -21,10 +23,10 @@
         data: {
             labels: labelsData,
             datasets: [{
-                label: '# of Votes',
+                label: '# of job offers',
                 data: dataForCharts,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(93, 164, 218, 0.5)',
+                borderColor: 'rgba(93, 164, 218, 1)',
                 borderWidth: 1
             }]
         },
@@ -40,5 +42,41 @@
         }
     });
     </script>
+
+     <script>
+        var mostPopular = {{ most_popular|json_encode|raw }}
+        mostPopular = JSON.parse(mostPopular);
+        //console.log(mostPopular);
+        const skill_name = mostPopular.map(data =>data.skill_name);
+        const ilosc = mostPopular.map(data => data.ilosc);
+
+        var ctx = document.getElementById('mostPopular');
+        var myChart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: skill_name,
+            datasets: [{
+                label: '# of offers with skill',
+                data: ilosc,
+                backgroundColor: 'rgba(93, 164, 218, 0.5)',
+                borderColor: 'rgba(93, 164, 218, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive:false,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+
+    </script>
+   
      
 {% endblock %}
