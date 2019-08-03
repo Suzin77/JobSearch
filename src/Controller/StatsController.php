@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Model\Stats;
-//use Symfony\Component\Debug\Debug;
 use \Doctrine\Common\Util\Debug;
 
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +39,7 @@ class StatsController extends AbstractController
         return $this->render('stats.html.twig', ['data'=>$data]);
     }
 
-     public function getNumberOfRows()
+    public function getNumberOfRows()
     {
         $conn = $this->getDoctrine()->getManager()->getConnection();
         $sql = "SELECT NUM_ROWS FROM information_schema.INNODB_SYS_TABLESTATS where NAME = 'jobsearch/job'";
@@ -48,5 +47,22 @@ class StatsController extends AbstractController
         $stmt->execute();
         $rows = $stmt->fetchAll();
         return $rows[0]['NUM_ROWS'];
+    }
+
+    /**
+     * @Route("/charts", name = "charts")
+     */
+
+    public function chart()
+    {
+        $conn = $this->getDoctrine()->getManager()->getConnection(); 
+        $stats = new Stats($conn);
+        $data = $stats->jobsPerDay();
+        $data = json_encode($data);
+        $mostPopular = $stats->getMostPopularSkills(20);
+        $mostPopular = json_encode($mostPopular);
+        dump($mostPopular);
+
+        return $this->render('chart.html.twig', ['data'=>$data, 'most_popular'=>$mostPopular]);
     }
 }
