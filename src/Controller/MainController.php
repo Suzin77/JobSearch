@@ -27,12 +27,25 @@ class MainController extends AbstractController
     public function index()
     {
         
+        // $url = 'https://justjoin.it/api/offers';
+        // $data = [];
+        // $jobOffers = new JobOfferContent();
+        // $offers = $jobOffers->getJobOffers($url);
+        // $this->saveOffers($offers);
+        return $this->render('main_body.html.twig');
+    }
+
+    /**
+     * @Route("/get_offers", name = "get_offers")
+     */
+    public function update()
+    {
         $url = 'https://justjoin.it/api/offers';
         $data = [];
         $jobOffers = new JobOfferContent();
         $offers = $jobOffers->getJobOffers($url);
         $this->saveOffers($offers);
-        return $this->render('base.html.twig');
+        return $this->redirectToRoute('index');        
     }
 
     public function saveOffers(array $offers): void
@@ -49,7 +62,7 @@ class MainController extends AbstractController
                 $jobOfferWriter->settingJob($job);
             }          
         }
-        dump($count);
+        //dump($count);
     }
 
     public function lastByDate():int

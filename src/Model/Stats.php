@@ -52,7 +52,10 @@ class Stats
     public function jobsPerDay()
     {
         $db = $this->db;
-        $sql = "SELECT DATE(published_at) publish,COUNT(DISTINCT id) total_per_day FROM `job` WHERE published_at > '2019-05-25'GROUP BY DATE(published_at)";
+        $sql = "SELECT DATE(published_at) publish,COUNT(DISTINCT id) total_per_day 
+                FROM `job` 
+                WHERE published_at > '2019-05-25'
+                GROUP BY DATE(published_at)";
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
@@ -62,8 +65,12 @@ class Stats
     public function getMostPopularSkills(int $num): array 
     {
         $db = $this->db;
-        $sql = "SELECT COUNT(skill_name) AS 'ilosc', skill_name FROM skills INNER JOIN job_skills ON skills.id = job_skills.skills_id GROUP BY skill_name  
-        ORDER BY `ilosc`  DESC LIMIT $num";
+        $sql = "SELECT COUNT(skill_name) AS 'ilosc', skill_name 
+                FROM skills 
+                INNER JOIN job_skills 
+                ON skills.id = job_skills.skills_id 
+                GROUP BY skill_name  
+                ORDER BY `ilosc`  DESC LIMIT $num";
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
@@ -110,5 +117,24 @@ group by yearweek(published_at)
 select count(*), yearweek(published_at,7)
 from job 
 group by yearweek(published_at,7)
+
+jakie skille popularne z danyj jezykiem 
+SELECT COUNT(skill_name) AS 'ilosc', skill_name 
+FROM skills 
+INNER JOIN (
+    SELECT * 
+    FROM `job_skills` 
+    WHERE job_id IN (
+        SELECT job_id 
+        FROM `skills` 
+        INNER JOIN job_skills
+        ON skills.id = job_skills.skills_id 
+        WHERE skill_name = 'JavaScript'
+        )
+    ) AS new_js 
+ON skills.id = new_js.skills_id 
+GROUP BY skill_name 
+ORDER BY `ilosc` 
+DESC LIMIT 10
 
 */
