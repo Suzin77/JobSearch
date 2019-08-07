@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+
+    <p>to jest search</p>
+    {% if my_form is defined %}
+    <div>
+        {{ form_start(my_form) }}
+        {{ form_widget(my_form) }}
+        {{ form_end(my_form) }}
+        {% if data is defined %}
+            <p>wpisales\: {{data.city}}</p>
+            <p>Znaleziono {{data.dbData_count}} ofert</p>
+        {% endif %}    
+    </div>
+    {% endif %}
+{% endblock %}
