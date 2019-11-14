@@ -137,4 +137,56 @@ GROUP BY skill_name
 ORDER BY `ilosc` 
 DESC LIMIT 10
 
+ilosc ofert z podzialem namiasta w danym miesiacy 
+SELECT COUNT(*) AS Many, city 
+FROM job 
+WHERE published_at BETWEEN '2019-07-01' AND '2019-07-31' 
+GROUP BY city 
+ORDER BY Many DESC
+
+most popular skills in city
+SELECT COUNT(skill_name) AS 'ilosc', skill_name 
+                FROM skills 
+                INNER JOIN job_skills 
+                ON skills.id = job_skills.skills_id
+                INNER JOIN job
+                ON job_skills.job_id = job.id
+                WHERE city = 'krakow'
+                GROUP BY skill_name  
+                ORDER BY `ilosc`  DESC LIMIT 10
+
+napopularniejsze skille wraz z poziomem zaawansowania
+
+SELECT skill_name, skill_level, COUNT(skill_name) AS num 
+FROM 
+    (SELECT s.skill_name, s.skill_level 
+     FROM skills AS s
+     JOIN job_skills AS j
+     ON s.id = j.skills_id
+     WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))) 
+AS result
+GROUP BY result.skill_name, result.skill_level
+ORDER BY num DESC
+
+najpopularniesze skille z poziomem z zakresem dni 
+SELECT s.skill_name, s.skill_level FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))
+AND js.published_at BETWEEN '2019-08-01' AND NOW()
+
+most freq skills in last month (with divide on skill level)
+
+SELECT skill_name, skill_level, COUNT(skill_name) AS num FROM (SELECT s.skill_name, s.skill_level FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))
+AND js.published_at BETWEEN DATE_ADD(NOW(), INTERVAL -1 MONTH) AND NOW()) AS result
+GROUP BY result.skill_name, result.skill_level
+ORDER BY num DESC
+
 */
