@@ -78,13 +78,12 @@ class JobOfferWriter extends AbstractController
     {
         foreach($skills as $skill){
             $skillCheck = $this->entityManager->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
-            if($skillCheck === null){           
-                $entityManager = $this->entityManager->getManager();
+            if($skillCheck === null){
                 $skill_to_save = new Skills();
                 $skill_to_save->setSkillName($skill['name']);
                 $skill_to_save->setSkillLevel($skill['level']);
-                $entityManager->persist($skill_to_save);
-                $entityManager->flush();
+                $this->entityManager->persist($skill_to_save);
+                $this->entityManager->flush();
             }
         }
     }
