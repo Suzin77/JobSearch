@@ -5,6 +5,7 @@ namespace App\Model;
 use App\Entity\Job;
 use App\Entity\Skills;
 use \Doctrine\Common\Util\Debug;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -22,86 +23,90 @@ class Stats
         4=>['skill_name'=>"SQL"],
         5=>['skill_name'=>"C#"]
     ];
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
 
-    public function __construct($db){
-        $this->db = $db;
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->em = $entityManager;
     }
 
-    public function getDataWithPopularSkills(array $skillsArray = self::DEFAULT_SKILLS)
+    public function getDataWithPopularSkills(array $skillsArray = self::DEFAULT_SKILLS, int $limit=5)
     {
         $manySkills = [];
         foreach ($skillsArray as $sk){
 
-            $manySkills[$sk['skill_name']]= $this->getMostPopularSkillWith($sk['skill_name'],count($skillsArray));
+            $manySkills[$sk['skill_name']]= $this->getMostPopularSkillWith($sk['skill_name'],$limit+1);
         }
 
         return $manySkills;
     }
 
-    public function getDistinctNumberOf(string $table, string $field)
+    public function getNumberOfRows()
     {
-        $db = $this->db;
-        $sql = "SELECT COUNT(DISTINCT($field)) AS $field FROM $table ORDER BY $field ASC";
-        $stmt = $db->prepare($sql);
+        $sql = "SELECT NUM_ROWS FROM information_schema.INNODB_SYS_TABLESTATS where NAME = 'jobsearch/job'";
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
-        //dump($rows);
+        return $rows[0]['NUM_ROWS'];
+    }
+
+    public function getDistinctNumberOf(string $table, string $field)
+    {
+        $sql = "SELECT COUNT(DISTINCT($field)) AS $field FROM $table ORDER BY $field ASC";
+        $stmt = $this->em->getConnection()->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
         return $rows[0][$field];
     }
 
     public function getSkills()
     {
-        $db = $this->db;
         $sql = "SELECT DISTINCT(skill_name) FROM skills ORDER BY skill_name ASC";
-        $stmt = $db->prepare($sql);
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll();
-        //dump($rows);
-        return $rows; 
+        return $stmt->fetchAll();
     }
 
     public function getJob()
     {
-        $db = $this->db;
         $sql = "SELECT * FROM job LIMIT 10";
-        $stmt = $db->prepare($sql);
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll();
-        dump($rows);
-        return $rows; 
+
+        return $stmt->fetchAll();
     }
 
     public function jobsPerDay()
     {
-        $db = $this->db;
         $sql = "SELECT DATE(published_at) publish,COUNT(DISTINCT id) total_per_day 
                 FROM `job` 
                 WHERE published_at > '2019-05-25'
                 GROUP BY DATE(published_at)";
-        $stmt = $db->prepare($sql);
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll();
-        return $rows;
+
+        return $stmt->fetchAll();
     }
 
     public function getMostPopularSkills(int $num): array 
     {
-        $db = $this->db;
         $sql = "SELECT COUNT(skill_name) AS 'ilosc', skill_name 
                 FROM skills 
                 INNER JOIN job_skills 
                 ON skills.id = job_skills.skills_id 
                 GROUP BY skill_name  
                 ORDER BY `ilosc`  DESC LIMIT $num";
-        $stmt = $db->prepare($sql);
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll();
-        return $rows;
+        return $stmt->fetchAll();
     }
 
     public function getMostPopularSkillWith(string $skillName, int $limit)
     {
-        $db = $this->db;
         $sql = "SELECT COUNT(skill_name) AS 'amount', skill_name 
                 FROM skills 
                 INNER JOIN (
@@ -121,10 +126,9 @@ class Stats
                 DESC LIMIT ".$limit.";"
         ;
 
-        $stmt = $db->prepare($sql);
+        $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll();
-        return $rows;
+        return $stmt->fetchAll();
     }
 
 }
