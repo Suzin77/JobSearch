@@ -4,17 +4,38 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Form\SearchJobType;
+use App\Repository\JobRepository;
+use Doctrine\Common\Collections;
+use Doctrine\Common\Collections\Criteria as Criteria;
+use Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-use \Doctrine\Common\Util\Debug;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class SearchController extends AbstractController
 {
+
+    /**
+     * @var EntityManager
+     */
+    private $em;
+    /**
+     * @var Criteria
+     */
+    private $criteria;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->em = $entityManager;
+        $this->criteria = new \Doctrine\Common\Collections\Criteria();
+    }
+
     /**
      * @Route("/search", name = "search")
      */
@@ -22,22 +43,33 @@ class SearchController extends AbstractController
     {
         $form = $this->createForm(SearchJobType::class);
         $form->handleRequest($request);
+
+        $jobs = $this->em->getRepository(Job::class);
         
         if($form->isSubmitted() && $form->isValid()){
+
             $data = $form->getData();
-            $dbData = $this->getJob($data['city']);
-            $data['dbData']=$dbData;
-            $data['dbData_count'] = count($dbData);
-            dump($data);
+
+            $queryBuilder = $jobs->createQueryBuilder('job');
+            $this->addMyCriteria('city',$data['city']);
+            $this->addMyCriteria('experience_level', $data['experience_level']);
+            $this->addMyCriteria('marker_icon',$data['tech']);
+
+            $queryBuilder->addCriteria($this->criteria);
+
+            $firstData=$queryBuilder->getQuery()->execute();
+
+            $data['dbData']=$firstData;
+            $data['dbData_count'] = count($firstData);
+
             return $this->render('search.html.twig', ['my_form'=>$form->createView(), 'data'=>$data]);
         }
         return $this->render('search.html.twig',['my_form'=>$form->createView()]);
     }
 
-    public function getJob(string $city="")
+    public function addMyCriteria($field, $value)
     {
-        $response = $this->getDoctrine()->getRepository(Job::class)->findBy(['city'=>$city]);
-        return $response;
+        $this->criteria->andWhere($this->criteria->expr()->eq($field, $value));
     }
 
 }

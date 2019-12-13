@@ -4,18 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Model\Stats;
-use \Doctrine\Common\Util\Debug;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class StatsController extends AbstractController
 {
+
     /**
     * @Route("/stats", name = "stats")
     */
@@ -59,10 +56,20 @@ class StatsController extends AbstractController
         $stats = new Stats($conn);
         $data = $stats->jobsPerDay();
         $data = json_encode($data);
-        $mostPopular = $stats->getMostPopularSkills(20);
-        $mostPopular = json_encode($mostPopular);
-        dump($mostPopular);
+        $mostPopularRaw = $stats->getMostPopularSkills(15);
+        $mostPopular = json_encode($mostPopularRaw);
 
-        return $this->render('chart.html.twig', ['data'=>$data, 'most_popular'=>$mostPopular]);
+        //$mostPopularTen = $stats->getMostPopularSkills(5);
+
+        $manySkills = $stats->getDataWithPopularSkills();
+
+        return $this->render('chart.html.twig',
+            [
+                'data'=>$data,
+                'most_popular'=>$mostPopular,
+                'many_skills'=>$manySkills
+            ]);
     }
+
+
 }

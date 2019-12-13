@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
@@ -14,7 +15,19 @@ class SearchJobType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('city',TextType::class)
+            ->add('city',TextType::class,[
+                'required'=>false
+            ])
+            ->add('experience_level',ChoiceType::class,[
+                'choices'=>[
+                    'junior'=>'junior',
+                    'mid'=>'mid',
+                    'expert'=>'senior'
+                ]
+            ])
+            ->add('tech',TextType::class,[
+                'required'=>false
+            ])
             ->add('submit',SubmitType::class)
             ->getForm();
         ;

@@ -12,8 +12,30 @@ use Doctrine\ORM\EntityManager;
 
 class Stats
 {
+    private $db;
+
+    public const DEFAULT_SKILLS = [
+        0=>['skill_name'=>"JavaScript"],
+        1=>['skill_name'=>"Java"],
+        2=>['skill_name'=>"Python"],
+        3=>['skill_name'=>"PHP"],
+        4=>['skill_name'=>"SQL"],
+        5=>['skill_name'=>"C#"]
+    ];
+
     public function __construct($db){
         $this->db = $db;
+    }
+
+    public function getDataWithPopularSkills(array $skillsArray = self::DEFAULT_SKILLS)
+    {
+        $manySkills = [];
+        foreach ($skillsArray as $sk){
+
+            $manySkills[$sk['skill_name']]= $this->getMostPopularSkillWith($sk['skill_name'],count($skillsArray));
+        }
+
+        return $manySkills;
     }
 
     public function getDistinctNumberOf(string $table, string $field)
@@ -71,6 +93,34 @@ class Stats
                 ON skills.id = job_skills.skills_id 
                 GROUP BY skill_name  
                 ORDER BY `ilosc`  DESC LIMIT $num";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        return $rows;
+    }
+
+    public function getMostPopularSkillWith(string $skillName, int $limit)
+    {
+        $db = $this->db;
+        $sql = "SELECT COUNT(skill_name) AS 'amount', skill_name 
+                FROM skills 
+                INNER JOIN (
+                    SELECT * 
+                    FROM `job_skills` 
+                    WHERE job_id IN (
+                        SELECT job_id 
+                        FROM `skills` 
+                        INNER JOIN job_skills
+                        ON skills.id = job_skills.skills_id 
+                        WHERE skill_name = '".$skillName."'
+                        )
+                    ) AS new_js 
+                ON skills.id = new_js.skills_id 
+                GROUP BY skill_name 
+                ORDER BY `amount` 
+                DESC LIMIT ".$limit.";"
+        ;
+
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
@@ -136,5 +186,57 @@ ON skills.id = new_js.skills_id
 GROUP BY skill_name 
 ORDER BY `ilosc` 
 DESC LIMIT 10
+
+ilosc ofert z podzialem namiasta w danym miesiacy 
+SELECT COUNT(*) AS Many, city 
+FROM job 
+WHERE published_at BETWEEN '2019-07-01' AND '2019-07-31' 
+GROUP BY city 
+ORDER BY Many DESC
+
+most popular skills in city
+SELECT COUNT(skill_name) AS 'ilosc', skill_name 
+                FROM skills 
+                INNER JOIN job_skills 
+                ON skills.id = job_skills.skills_id
+                INNER JOIN job
+                ON job_skills.job_id = job.id
+                WHERE city = 'krakow'
+                GROUP BY skill_name  
+                ORDER BY `ilosc`  DESC LIMIT 10
+
+napopularniejsze skille wraz z poziomem zaawansowania
+
+SELECT skill_name, skill_level, COUNT(skill_name) AS num 
+FROM 
+    (SELECT s.skill_name, s.skill_level 
+     FROM skills AS s
+     JOIN job_skills AS j
+     ON s.id = j.skills_id
+     WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))) 
+AS result
+GROUP BY result.skill_name, result.skill_level
+ORDER BY num DESC
+
+najpopularniesze skille z poziomem z zakresem dni 
+SELECT s.skill_name, s.skill_level FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))
+AND js.published_at BETWEEN '2019-08-01' AND NOW()
+
+most freq skills in last month (with divide on skill level)
+
+SELECT skill_name, skill_level, COUNT(skill_name) AS num FROM (SELECT s.skill_name, s.skill_level FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))
+AND js.published_at BETWEEN DATE_ADD(NOW(), INTERVAL -1 MONTH) AND NOW()) AS result
+GROUP BY result.skill_name, result.skill_level
+ORDER BY num DESC
 
 */
