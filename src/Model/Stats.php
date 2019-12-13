@@ -12,8 +12,30 @@ use Doctrine\ORM\EntityManager;
 
 class Stats
 {
+    private $db;
+
+    public const DEFAULT_SKILLS = [
+        0=>['skill_name'=>"JavaScript"],
+        1=>['skill_name'=>"Java"],
+        2=>['skill_name'=>"Python"],
+        3=>['skill_name'=>"PHP"],
+        4=>['skill_name'=>"SQL"],
+        5=>['skill_name'=>"C#"]
+    ];
+
     public function __construct($db){
         $this->db = $db;
+    }
+
+    public function getDataWithPopularSkills(array $skillsArray = self::DEFAULT_SKILLS)
+    {
+        $manySkills = [];
+        foreach ($skillsArray as $sk){
+
+            $manySkills[$sk['skill_name']]= $this->getMostPopularSkillWith($sk['skill_name'],count($skillsArray));
+        }
+
+        return $manySkills;
     }
 
     public function getDistinctNumberOf(string $table, string $field)
@@ -71,6 +93,34 @@ class Stats
                 ON skills.id = job_skills.skills_id 
                 GROUP BY skill_name  
                 ORDER BY `ilosc`  DESC LIMIT $num";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        return $rows;
+    }
+
+    public function getMostPopularSkillWith(string $skillName, int $limit)
+    {
+        $db = $this->db;
+        $sql = "SELECT COUNT(skill_name) AS 'amount', skill_name 
+                FROM skills 
+                INNER JOIN (
+                    SELECT * 
+                    FROM `job_skills` 
+                    WHERE job_id IN (
+                        SELECT job_id 
+                        FROM `skills` 
+                        INNER JOIN job_skills
+                        ON skills.id = job_skills.skills_id 
+                        WHERE skill_name = '".$skillName."'
+                        )
+                    ) AS new_js 
+                ON skills.id = new_js.skills_id 
+                GROUP BY skill_name 
+                ORDER BY `amount` 
+                DESC LIMIT ".$limit.";"
+        ;
+
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
