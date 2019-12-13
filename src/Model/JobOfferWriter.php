@@ -5,13 +5,24 @@ namespace App\Model;
 use App\Entity\Job;
 use App\Entity\Skills;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Doctrine\ORM\EntityManager;
 
-class JobOfferWriter extends Controller
+class JobOfferWriter extends AbstractController
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     public function settingJob($data)
     { 
         $job = new Job();
@@ -38,9 +49,8 @@ class JobOfferWriter extends Controller
         //2019-06-11 update , now it works.
         $this->saveNewSkills($data['skills']);
         $this->skillsHandler($job, $data['skills']);
-        $entityManager = $this->doctrine->getManager();
-        $entityManager->persist($job);
-        $entityManager->flush();
+        $this->entityManager->persist($job);
+        $this->entityManager->flush();
 
         return $job;
     }
@@ -57,7 +67,9 @@ class JobOfferWriter extends Controller
     public function skillsHandler(Job $job , array $skills): void
     {
         foreach($skills as $skill){
-            $skill_from_db = $this->doctrine->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
+
+            $skill_from_db = $this->entityManager->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
+            //$skill_from_db = $this->doctrine->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
             $job->addJobSkillCollection($skill_from_db);
         }
     }
@@ -65,9 +77,9 @@ class JobOfferWriter extends Controller
     public function saveNewSkills(array $skills): void
     {
         foreach($skills as $skill){
-            $skillCheck = $this->doctrine->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
+            $skillCheck = $this->entityManager->getRepository(Skills::class)->findOneBy(['skill_name'=>$skill['name'], 'skill_level'=>$skill['level']]);
             if($skillCheck === null){           
-                $entityManager = $this->doctrine->getManager();
+                $entityManager = $this->entityManager->getManager();
                 $skill_to_save = new Skills();
                 $skill_to_save->setSkillName($skill['name']);
                 $skill_to_save->setSkillLevel($skill['level']);
@@ -93,5 +105,11 @@ class JobOfferWriter extends Controller
     public function setDoctrine($doctrine)
     {
         $this->doctrine = $doctrine;
+
+    }
+
+    public function test(int $id)
+    {
+        return $this->getDoctrine()->getRepository(Skills::class)->find(['id'=>$id]);
     }
 }
