@@ -12,6 +12,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class StatsController extends AbstractController
 {
+    /**
+     * @var Stats
+     */
+    private $stats;
+
+    public function __construct(Stats $stats)
+    {
+        $this->stats = $stats;
+    }
 
     /**
     * @Route("/stats", name = "stats")
@@ -19,14 +28,12 @@ class StatsController extends AbstractController
 
     public function main()
     {
-        $conn = $this->getDoctrine()->getManager()->getConnection(); 
-        $stats = new Stats($conn);
-        $firms_num = $stats->getDistinctNumberOf('job','company_name');
-        $skills_num = $stats->getDistinctNumberOf('skills', 'skill_name');
-        $skills_list = $stats->getSkills();
-        $offerAmounts = $this->getNumberOfRows();
+        $firms_num = $this->stats->getDistinctNumberOf('job','company_name');
+        $skills_num = $this->stats->getDistinctNumberOf('skills', 'skill_name');
+        $skills_list = $this->stats->getSkills();
+        $offerAmounts = $this->stats->getNumberOfRows();
 
-        $stats->getJob();
+        $this->stats->getJob();
         $data = [
             'offersAmounts' =>$offerAmounts,
             'firms' => $firms_num,
@@ -36,15 +43,6 @@ class StatsController extends AbstractController
         return $this->render('stats.html.twig', ['data'=>$data]);
     }
 
-    public function getNumberOfRows()
-    {
-        $conn = $this->getDoctrine()->getManager()->getConnection();
-        $sql = "SELECT NUM_ROWS FROM information_schema.INNODB_SYS_TABLESTATS where NAME = 'jobsearch/job'";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $rows = $stmt->fetchAll();
-        return $rows[0]['NUM_ROWS'];
-    }
 
     /**
      * @Route("/charts", name = "charts")
@@ -52,16 +50,15 @@ class StatsController extends AbstractController
 
     public function chart()
     {
-        $conn = $this->getDoctrine()->getManager()->getConnection(); 
-        $stats = new Stats($conn);
-        $data = $stats->jobsPerDay();
+        $data = $this->stats->jobsPerDay();
         $data = json_encode($data);
-        $mostPopularRaw = $stats->getMostPopularSkills(15);
+        $mostPopularRaw = $this->stats->getMostPopularSkills(15);
         $mostPopular = json_encode($mostPopularRaw);
 
-        //$mostPopularTen = $stats->getMostPopularSkills(5);
+        $mostPopularTen = $this->stats->getMostPopularSkills(3);
 
-        $manySkills = $stats->getDataWithPopularSkills();
+        //$manySkills = $stats->getDataWithPopularSkills();
+        $manySkills = $this->stats->getDataWithPopularSkills($mostPopularTen,3);
 
         return $this->render('chart.html.twig',
             [
