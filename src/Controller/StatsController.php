@@ -61,7 +61,7 @@ class StatsController extends AbstractController
         $data = json_encode($data);
         $mostPopular = $stats->getMostPopularSkills(20);
         $mostPopular = json_encode($mostPopular);
-        dump($mostPopular);
+        //dump($mostPopular);
 
         return $this->render('chart.html.twig', ['data'=>$data, 'most_popular'=>$mostPopular]);
     }
