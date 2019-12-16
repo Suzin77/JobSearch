@@ -5,6 +5,8 @@
     
     <canvas id="my" width="1080" height= "600"></canvas>
     <canvas id="mostPopular" width="1080" height= "600"></canvas>
+    <canvas id="line" width="1080" height= "600"></canvas>
+
 
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
@@ -75,8 +77,44 @@
         }
     });
 
+    </script>
+
+    <script>
+
+        var lineData = {{ line_data|json_encode|raw }};
+        var newData = JSON.parse(lineData);
+        const labelsWeek = newData.map(obj=>obj.week);
+        const skillNum = newData.map(obj=>obj.many);
+
+        var dataForCharts = {};
+
+        var ctx = document.getElementById('line');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labelsWeek,
+                datasets: [{
+                    label: '# of job offers',
+                    data: skillNum,
+                    backgroundColor: 'rgba(93, 164, 218, 0.5)',
+                    borderColor: 'rgba(93, 164, 218, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive:false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
 
     </script>
+    {% if many_skills is defined %}
     <div class="container">
         <div class="row">
         {% for skills in many_skills %}
@@ -107,5 +145,6 @@
         {% endfor %}
         </div>
     </div>
+    {% endif %}
 
 {% endblock %}

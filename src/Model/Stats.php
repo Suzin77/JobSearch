@@ -110,7 +110,7 @@ class Stats
         $sql = "SELECT COUNT(skill_name) AS 'amount', skill_name 
                 FROM skills 
                 INNER JOIN (
-                    SELECT * 
+                    SELECT job_id, skills_id 
                     FROM `job_skills` 
                     WHERE job_id IN (
                         SELECT job_id 
@@ -125,6 +125,42 @@ class Stats
                 ORDER BY `amount` 
                 DESC LIMIT ".$limit.";"
         ;
+
+        $stmt = $this->em->getConnection()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getSkillPerWeek(string $tech)
+    {
+        $sql = "SELECT COUNT(*) AS many, WEEKOFYEAR(published_at) AS week
+                        FROM job 
+                        INNER JOIN job_skills
+                        ON job.id = job_skills.job_id
+                        INNER JOIN skills
+                        ON job_skills.skills_id = skills.id
+                        WHERE skills.skill_name = \"".$tech."\"
+                        GROUP BY WEEKOFYEAR(published_at) 
+            
+        ";
+
+        $stmt = $this->em->getConnection()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getSkillPerMonth(string $tech)
+    {
+        $sql = "SELECT COUNT(*) AS many, MONTH(published_at) AS week
+                        FROM job 
+                        INNER JOIN job_skills
+                        ON job.id = job_skills.job_id
+                        INNER JOIN skills
+                        ON job_skills.skills_id = skills.id
+                        WHERE skills.skill_name = \"".$tech."\"
+                        GROUP BY MONTH(published_at) 
+            
+        ";
 
         $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
@@ -242,5 +278,38 @@ WHERE s.skill_level IN(SELECT DISTINCT(s.skill_level))
 AND js.published_at BETWEEN DATE_ADD(NOW(), INTERVAL -1 MONTH) AND NOW()) AS result
 GROUP BY result.skill_name, result.skill_level
 ORDER BY num DESC
+
+num of skills in last month
+SELECT skill_name, COUNT(skill_name) AS num FROM (SELECT s.skill_name FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_name IN(SELECT DISTINCT(s.skill_name))
+AND js.published_at BETWEEN DATE_ADD(NOW(), INTERVAL -1 MONTH) AND NOW()) AS result
+GROUP BY result.skill_name
+ORDER BY num DESC
+
+num of skills in date range
+SELECT skill_name, COUNT(skill_name) AS num FROM (SELECT s.skill_name FROM skills AS s
+JOIN job_skills AS j
+ON s.id = j.skills_id
+JOIN job AS js
+ON j.job_id = js.id
+WHERE s.skill_name IN(SELECT DISTINCT(s.skill_name))
+AND js.published_at BETWEEN '2019-08-01' AND '2019-10-01') AS result
+GROUP BY result.skill_name
+ORDER BY num DESC
+LIMIT 20
+
+spec skills number div by weeks
+select count(*), WEEKOFYEAR(published_at) AS week
+from job
+INNER JOIN job_skills
+ON job.id = job_skills.job_id
+INNER JOIN skills
+ON job_skills.skills_id = skills.id
+WHERE skills.skill_name = "PHP"
+group by WEEKOFYEAR(published_at)
 
 */
