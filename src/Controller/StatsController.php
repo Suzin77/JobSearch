@@ -48,7 +48,7 @@ class StatsController extends AbstractController
      * @Route("/charts", name = "charts")
      */
 
-    public function chart()
+    public function charts()
     {
         $data = $this->stats->jobsPerDay();
         $data = json_encode($data);
@@ -58,13 +58,22 @@ class StatsController extends AbstractController
         $mostPopularTen = $this->stats->getMostPopularSkills(3);
 
         //$manySkills = $stats->getDataWithPopularSkills();
-        $manySkills = $this->stats->getDataWithPopularSkills($mostPopularTen,3);
+        $manySkills = $this->stats->getDataWithPopularSkills();
+        //$manySkills = [];
+
+        //line chart of skill
+
+        //$lineData = $this->stats->getSkillPerWeek("Python");
+        $lineData = $this->stats->getSkillPerMonth('JavaScript');
+        $lineData = json_encode($lineData);
+        //dump($lineData);
 
         return $this->render('chart.html.twig',
             [
                 'data'=>$data,
                 'most_popular'=>$mostPopular,
-                'many_skills'=>$manySkills
+                'many_skills'=>$manySkills,
+                'line_data'=>$lineData
             ]);
     }
 
