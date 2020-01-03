@@ -69,7 +69,9 @@ class SearchController extends AbstractController
 
     public function addMyCriteria($field, $value)
     {
-        $this->criteria->andWhere($this->criteria->expr()->eq($field, $value));
+        if($value !== NULL) {
+            $this->criteria->andWhere($this->criteria->expr()->eq($field, $value));
+        }
     }
 
 }
