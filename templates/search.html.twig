@@ -17,15 +17,24 @@
                         <th>Company Name</th>
                         <th>Job Title</th>
                         <th>Skills</th>
-                    </tr>        
+                        <th>Salary from</th>
+                        <th>Salary to</th>
+                        <th>Published</th>
+
+                    </tr>
                 </thead>
                 <tbody>
                 {% for key, job in data.dbData %}
                     <tr>
                         <td>{{job.city}}</td>
-                        <td>{{job.companyname}}</td>
+                        <td><a href="{{ job.companyUrl }}" target="_blank">{{job.companyname}}</a></td>
                         <td>{{job.title}}</td>
                         <td>{{job.skills}}</td>
+                        <td>{{job.salaryFrom}}</td>
+                        <td>{{job.salaryTo}}</td>
+                        <td>{{job.publishedAt|date("d/m/Y")}}</td>
+
+
                     </tr>
                 {% endfor %}
                 </tbody>

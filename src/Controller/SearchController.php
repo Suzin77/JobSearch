@@ -38,8 +38,11 @@ class SearchController extends AbstractController
 
     /**
      * @Route("/search", name = "search")
+     * @param Request $request
+     * @return Response
+     * @throws \Doctrine\ORM\Query\QueryException
      */
-    public function main(Request $request)
+    public function main(Request $request): Response
     {
         $form = $this->createForm(SearchJobType::class);
         $form->handleRequest($request);
@@ -56,6 +59,7 @@ class SearchController extends AbstractController
             $this->addMyCriteria('marker_icon',$data['tech']);
 
             $queryBuilder->addCriteria($this->criteria);
+            $queryBuilder->addOrderBy('job.published_at','DESC');
 
             $firstData=$queryBuilder->getQuery()->execute();
 
